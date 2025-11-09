@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>行列式與矩陣乘法具身學習</title>
+<style>
+    /* --- 樣式部分 --- */
+    html, body { margin: 0; padding: 0; width: 100%; }
+    #wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box; /* 確保 padding 不會導致寬度溢出 */
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; color: #333; }
+    
+    .container, .manual-container { background-color: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); margin-bottom: 30px; width: 100%; max-width: 600px; box-sizing: border-box; }
+    
+    .manual-container { background-color: #f7f9fc; border-top: 5px solid #3f51b5; }
+    .manual-container h1 { text-align: center; color: #1a237e; margin-top: 0; }
+    .manual-section { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px dashed #ccc; }
+    .manual-section:last-child { border-bottom: none; margin-bottom: 0; }
+    .manual-section h2 { color: #1565c0; border: none; padding-bottom: 5px; text-align: left; }
+    .manual-formula, .manual-text { font-size: 1.1em; font-weight: 500; line-height: 1.6; }
+    .manual-formula .plus, .sign-plus { color: #2e7d32; font-weight: bold; }
+    .manual-formula .minus, .sign-minus { color: #c62828; font-weight: bold; }
+
+    .sign-matrix { display: grid; grid-template-columns: repeat(3, 30px); gap: 5px; justify-content: center; margin: 10px 0; font-family: 'Courier New', monospace; font-size: 1.2em; }
+    .sign-cell { display: flex; justify-content: center; align-items: center; }
+    
+    h2 { text-align: center; color: #1a237e; border-bottom: 2px solid #3f51b5; padding-bottom: 10px; margin-top: 0; }
+    .matrix-grid { display: grid; gap: 10px; margin: 20px auto; position: relative; }
+    .grid-2x2 { grid-template-columns: repeat(2, 60px); justify-content: center; }
+    .grid-3x3 { grid-template-columns: repeat(3, 60px); justify-content: center; }
+    .grid-2x3 { grid-template-columns: repeat(3, 60px); justify-content: center; }
+    .grid-3x2 { grid-template-columns: repeat(2, 60px); justify-content: center; }
+    .matrix-op { display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; margin: 0 15px; }
+    .matrix-container { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
+    .cell { width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: bold; border: 2px solid #90a4ae; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; background-color: #eceff1; user-select: none; }
+    .cell:hover { background-color: #cfd8dc; transform: scale(1.05); }
+    .cell.path { background-color: #bbdefb !important; border-color: #1e88e5 !important; }
+    .cell.highlight { background-color: #ffeb3b !important; border-color: #fbc02d !important; box-shadow: 0 0 15px rgba(255, 235, 59, 0.8); transform: scale(1.1); animation: pulse 1.5s infinite; }
+    .cell.disabled { background-color: #f5f5f5; color: #bdbdbd; cursor: not-allowed; border-color: #e0e0e0; }
+    .cell.result-cell { background-color: #fffde7; border-style: dashed; }
+    .cell.cofactor-sub { background-color: #c8e6c9 !important; border-color: #4caf50 !important; transform: scale(1.05); }
+    .cell.cofactor-mask { background-color: rgba(158, 158, 158, 0.5) !important; border-style: dashed; color: #757575; }
+    .formula-display { text-align: center; margin-top: 20px; font-size: 1.1em; font-weight: 500; min-height: 50px; padding: 15px; background-color: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; letter-spacing: 1.5px; word-wrap: break-word; line-height: 1.5; }
+    .final-result { font-weight: bold; color: #d32f2f; }
+    .correct-label { font-weight: bold; color: #2e7d32; margin-left: 8px; }
+    .reset-btn { display: block; margin: 20px auto 0; padding: 10px 20px; font-size: 16px; font-weight: bold; color: #fff; background-color: #3f51b5; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
+    .reset-btn:hover { background-color: #303f9f; transform: translateY(-2px); }
+    .latex-img { vertical-align: middle; margin-bottom: 4px; } /* 對齊 LaTex 圖片 */
+    @keyframes pulse { 0% { box-shadow: 0 0 10px rgba(255, 235, 59, 0.6); } 50% { box-shadow: 0 0 20px rgba(255, 235, 59, 1); } 100% { box-shadow: 0 0 10px rgba(255, 235, 59, 0.6); } }
+</style>
+</head>
+<body>
+
+<!--  新的全域包裝容器 -->
+<div id="wrapper">
+
+    <!--  統一的學習手冊  -->
+    <div class="manual-container">
+        <h1>學習手冊：行列式與矩陣乘法</h1>
+
+        <div class="manual-section">
+            <h2>1. 行列式展開的正負號規則</h2>
+            <div class="manual-formula">
+                3x3 矩陣按第一行展開：<br>
+                det = <span class="plus">+a</span>(ei-fh) <span class="minus">-b</span>(di-fg) <span class="plus">+c</span>(dh-eg)<br>
+                每個元素的正負號由它的位置決定，其結構如同一個棋盤：
+                <div class="sign-matrix">
+                    <div class="sign-cell sign-plus">+</div><div class="sign-cell sign-minus">-</div><div class="sign-cell sign-plus">+</div>
+                    <div class="sign-cell sign-minus">-</div><div class="sign-cell sign-plus">+</div><div class="sign-cell sign-minus">-</div>
+                    <div class="sign-cell sign-plus">+</div><div class="sign-cell sign-minus">-</div><div class="sign-cell sign-plus">+</div>
+                </div>
+                括號內的 2x2 行列式，永遠遵循 "<b>主對角線相乘(左上右下) <span class="minus">-</span> 副對角線相乘(右上左下)</b>"。
+            </div>
+        </div>
+
+        <div class="manual-section">
+            <h2>2. 矩陣乘法的基本規則</h2>
+            <div class="manual-text" style="font-family: monospace, sans-serif;">
+                <p>假設有兩個二階矩陣 A 和 B：</p>
+                <!--  修正了 URL 編碼的 LaTeX 圖片  -->
+                <p>A = <img class="latex-img" src="https://latex.codecogs.com/svg.latex?%5Cdpi%7B120%7D%5Cbegin%7Bpmatrix%7D%20a%20%26%20b%20%5C%5C%20c%20%26%20d%20%5Cend%7Bpmatrix%7D" alt="Matrix A"/> , B = <img class="latex-img" src="https://latex.codecogs.com/svg.latex?%5Cdpi%7B120%7D%5Cbegin%7Bpmatrix%7D%20e%20%26%20f%20%5C%5C%20g%20%26%20h%20%5Cend%7Bpmatrix%7D" alt="Matrix B"/></p>
+                <p>它們的乘積 C = A × B 的結果如下：</p>
+                <p>C = <img class="latex-img" src="https://latex.codecogs.com/svg.latex?%5Cdpi%7B120%7D%5Cbegin%7Bpmatrix%7D%20ae+bg%20%26%20af+bh%20%5C%5C%20ce+dg%20%26%20cf+dh%20%5Cend%7Bpmatrix%7D" alt="Matrix C"/></p>
+                <p style="font-family: sans-serif; font-weight: normal;"><b>核心口訣：</b>結果矩陣 C 的第 <b>i</b> 行第 <b>j</b> 列的元素，等於 A 的第 <b>i</b> 行與 B 的第 <b>j</b> 列進行「內積」(對應元素相乘後再相加)。這就是練習中「<b>左邊的橫排點右邊的豎排</b>」的由來。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 所有的練習容器 -->
+    <div class="container"><h2>1. 2x2 行列式</h2><p class="instruction">跟隨黃色高亮提示，依次點擊數字來完成計算。</p><div id="matrix-2x2" class="matrix-grid grid-2x2"></div><div id="formula-2x2" class="formula-display">det = ?</div><button class="reset-btn" onclick="initExercise('2x2')">重新開始</button></div>
+    <div class="container"><h2>2. 3x3 行列式 (沙路法)</h2><p class="instruction">點擊完成三條主對角線的計算，再點擊完成三條副對角線的計算。</p><div id="matrix-3x3-sarrus" class="matrix-grid grid-3x3"></div><div id="formula-3x3-sarrus" class="formula-display">det = ?</div><button class="reset-btn" onclick="initExercise('3x3-sarrus')">重新開始</button></div>
+    <div class="container"><h2>3. 3x3 按第一行展開 (學習結構)</h2><p class="instruction">點擊高亮係數，對應的子矩陣會自動標出，以學習展開結構。</p><div id="matrix-3x3-row1" class="matrix-grid grid-3x3"></div><div id="formula-3x3-row1" class="formula-display">det = ?</div><button class="reset-btn" onclick="initExercise('3x3-row1')">重新開始</button></div>
+    <div class="container"><h2>4. 3x3 按第一列展開 (學習結構)</h2><p class="instruction">點擊高亮係數，對應的子矩陣會自動標出，以學習展開結構。</p><div id="matrix-3x3-col1" class="matrix-grid grid-3x3"></div><div id="formula-3x3-col1" class="formula-display">det = ?</div><button class="reset-btn" onclick="initExercise('3x3-col1')">重新開始</button></div>
+    <div class="container"><h2>5. 矩陣乘法 (2x2) x (2x2)</h2><p class="instruction">跟隨高亮提示，從左矩陣點到右矩陣，像跳舞一樣完成內積計算！</p><div class="matrix-container"><div id="matrix-mul-A-2x2" class="matrix-grid grid-2x2"></div><div class="matrix-op">×</div><div id="matrix-mul-B-2x2" class="matrix-grid grid-2x2"></div><div class="matrix-op">=</div><div id="matrix-mul-R-2x2" class="matrix-grid grid-2x2"></div></div><div id="formula-mul-2x2" class="formula-display">點擊左邊高亮的數字開始...</div><button class="reset-btn" onclick="initExercise('mul-2x2')">重新開始</button></div>
+    <div class="container"><h2>6. 矩陣乘法 (3x3) x (3x3)</h2><p class="instruction">步驟變多了，但規則一樣：左邊的橫排點右邊的豎排。</p><div class="matrix-container"><div id="matrix-mul-A-3x3" class="matrix-grid grid-3x3"></div><div class="matrix-op">×</div><div id="matrix-mul-B-3x3" class="matrix-grid grid-3x3"></div><div class="matrix-op">=</div><div id="matrix-mul-R-3x3" class="matrix-grid grid-3x3"></div></div><div id="formula-mul-3x3" class="formula-display">點擊左邊高亮的數字開始...</div><button class="reset-btn" onclick="initExercise('mul-3x3')">重新開始</button></div>
+    <div class="container"><h2>7. 矩陣乘法 (2x3) x (3x2)</h2><p class="instruction">不同形狀的矩陣乘法，規則依然不變！</p><div class="matrix-container"><div id="matrix-mul-A-2x3" class="matrix-grid grid-2x3"></div><div class="matrix-op">×</div><div id="matrix-mul-B-3x2" class="matrix-grid grid-3x2"></div><div class="matrix-op">=</div><div id="matrix-mul-R-2x2-from-2x3" class="matrix-grid grid-2x2"></div></div><div id="formula-mul-2x3" class="formula-display">點擊左邊高亮的數字開始...</div><button class="reset-btn" onclick="initExercise('mul-2x3')">重新開始</button></div>
+</div>
+
+<script>
+    // JavaScript 邏輯部分確認無誤，保持不變
+    const state = {};
+
+    function generateDetFormula(type, stepIndex, values) {
+        const { steps, showStructureOnly } = configs[type];
+        let formula = "det =";
+        if (showStructureOnly) {
+            let fullFormula = "";
+            for (let i = 0; i < stepIndex; i++) {
+                const step = steps[i];
+                fullFormula += ` ${step.sign} ${values[step.target]} × | ${values[step.sub_det[0]]}, ${values[step.sub_det[1]]} ; ${values[step.sub_det[2]]}, ${values[step.sub_det[3]]} |`;
+            }
+            return formula + fullFormula;
+        }
+        let formulaParts = [];
+        let currentPart = "";
+        for (let i = 0; i < stepIndex; i++) {
+            const step = steps[i];
+            currentPart += values[step.target];
+            if (step.op) {
+                const nextStep = steps[i+1];
+                if (step.op === '×' && nextStep && (nextStep.op === '+' || nextStep.op === '-')) {
+                    currentPart = `(${currentPart})`;
+                }
+                currentPart += ` ${step.op} `;
+                if (step.op === '+' || step.op === '-') {
+                    formulaParts.push(currentPart);
+                    currentPart = "";
+                }
+            }
+        }
+        return formula + " " + formulaParts.join('') + currentPart;
+    }
+    
+    function generateMulFormula(type, stepIndex) {
+        const { steps, A_values, B_values, R_cols, A_cols } = configs[type];
+        if (stepIndex >= steps.length) return `<span class="final-result">恭喜完成所有計算！</span>`;
+        const currentStep = steps[stepIndex];
+        const R_idx = currentStep.result.index;
+        const allTermsForThisResult = steps.filter(s => s.result.index === R_idx);
+        const currentIndexInTerms = allTermsForThisResult.findIndex(s => s === currentStep);
+        const R_pos = `C₍${Math.floor(R_idx / R_cols) + 1},${R_idx % R_cols + 1}₎`;
+        let formula = `${R_pos} = `;
+        let runningTotal = 0;
+        let formulaParts = [];
+        for (let i = 0; i < A_cols; i++) {
+            const termStepIndex_A = i * 2;
+            const termStepIndex_B = i * 2 + 1;
+            const stepA = allTermsForThisResult[termStepIndex_A];
+            const A_val = A_values[stepA.target.A];
+            const B_val = B_values[stepA.target.B];
+            if (currentIndexInTerms >= termStepIndex_B) {
+                formulaParts.push(`(${A_val}×${B_val})`);
+                runningTotal += A_val * B_val;
+            } else if (currentIndexInTerms === termStepIndex_A) {
+                formulaParts.push(`(${A_val}×...)`);
+            } else {
+                formulaParts.push(`(...)`);
+            }
+        }
+        formula += formulaParts.join(' + ');
+        const isResultElementFinished = (currentIndexInTerms === A_cols * 2 - 1) && (currentStep.type === 'mul_B_click');
+        if (isResultElementFinished) {
+             formula += ` = <span class="final-result">${runningTotal}</span><span class="correct-label">(正確)</span>`;
+        }
+        return formula;
+    }
+
+    const configs = {
+        '2x2': { type: 'det', values: [5, 2, 8, 4], steps: [ { target: 0, op: '×' }, { target: 3, op: '-' }, { target: 1, op: '×' }, { target: 2 } ], finalCalc: v => (v[0]*v[3]) - (v[1]*v[2]) },
+        '3x3-sarrus': { type: 'det', values: [1,2,3,4,5,6,7,8,9], steps: [ {target:0,op:'×'},{target:4,op:'×'},{target:8,op:'+'}, {target:1,op:'×'},{target:5,op:'×'},{target:6,op:'+'}, {target:2,op:'×'},{target:3,op:'×'},{target:7,op:'-'}, {target:2,op:'×'},{target:4,op:'×'},{target:6,op:'-'}, {target:0,op:'×'},{target:5,op:'×'},{target:7,op:'-'}, {target:1,op:'×'},{target:3,op:'×'},{target:8} ], finalCalc: v=>(v[0]*v[4]*v[8]+v[1]*v[5]*v[6]+v[2]*v[3]*v[7])-(v[2]*v[4]*v[6]+v[0]*v[5]*v[7]+v[1]*v[3]*v[8])},
+        '3x3-row1': { type: 'det', showStructureOnly: true, values: [1,2,3,4,5,6,7,8,9], steps: [ { target: 0, sign: '+', sub_det: [4,5,7,8] }, { target: 1, sign: '-', sub_det: [3,5,6,8] }, { target: 2, sign: '+', sub_det: [3,4,6,7] } ] },
+        '3x3-col1': { type: 'det', showStructureOnly: true, values: [1,2,3,4,5,6,7,8,9], steps: [ { target: 0, sign: '+', sub_det: [4,5,7,8] }, { target: 3, sign: '-', sub_det: [1,2,7,8] }, { target: 6, sign: '+', sub_det: [1,2,4,5] } ] },
+        'mul-2x2': { type: 'mul', A_values: [1, 2, 4, 5], B_values: [7, 8, 9, 1], R_rows: 2, R_cols: 2, A_cols: 2 },
+        'mul-3x3': { type: 'mul', A_values: [1,2,3,4,5,6,7,8,9], B_values: [9,8,7,6,5,4,3,2,1], R_rows: 3, R_cols: 3, A_cols: 3 },
+        'mul-2x3': { type: 'mul', A_values: [1, 2, 3, 4, 5, 6], B_values: [7, 8, 9, 1, 2, 3], R_rows: 2, R_cols: 2, A_cols: 3 }
+    };
+    
+    function generateMultiplySteps(type) {
+        const { R_rows, R_cols, A_cols } = configs[type];
+        const steps = [];
+        for (let i = 0; i < R_rows; i++) {
+            for (let j = 0; j < R_cols; j++) {
+                for (let k = 0; k < A_cols; k++) {
+                    const resultInfo = { index: i * R_cols + j };
+                    const A_idx = i * A_cols + k;
+                    const B_idx = k * R_cols + j;
+                    steps.push({ type: 'mul_A_click', target: { grid: 'A', A: A_idx, B: B_idx }, result: resultInfo });
+                    steps.push({ type: 'mul_B_click', target: { grid: 'B', A: A_idx, B: B_idx }, result: resultInfo });
+                }
+            }
+        }
+        return steps;
+    }
+    for (const key in configs) { if (configs[key].type === 'mul') { configs[key].steps = generateMultiplySteps(key); } }
+
+    function getGridIds(type) {
+        if (type === 'mul-2x2') return { A: 'matrix-mul-A-2x2', B: 'matrix-mul-B-2x2', R: 'matrix-mul-R-2x2', F: 'formula-mul-2x2' };
+        if (type === 'mul-3x3') return { A: 'matrix-mul-A-3x3', B: 'matrix-mul-B-3x3', R: 'matrix-mul-R-3x3', F: 'formula-mul-3x3' };
+        if (type === 'mul-2x3') return { A: 'matrix-mul-A-2x3', B: 'matrix-mul-B-3x2', R: 'matrix-mul-R-2x2-from-2x3', F: 'formula-mul-2x3'};
+        return { grid: `matrix-${type}`, formula: `formula-${type}` };
+    }
+
+    function initExercise(type) {
+        const config = configs[type];
+        const ids = getGridIds(type);
+        state[type] = { currentStep: 0, path: [], finalResult: null };
+
+        if (config.type === 'det') {
+            const grid = document.getElementById(ids.grid);
+            grid.innerHTML = '';
+            config.values.forEach((val, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell'; cell.textContent = val;
+                cell.onclick = () => onCellClick(type, 'grid', index);
+                grid.appendChild(cell);
+            });
+        } else { 
+            const { A, B, R } = ids;
+            [A, B, R].forEach(id => document.getElementById(id).innerHTML = '');
+            config.A_values.forEach((val, i) => { const cell = document.createElement('div'); cell.className = 'cell'; cell.textContent = val; cell.onclick = () => onCellClick(type, 'A', i); document.getElementById(A).appendChild(cell); });
+            config.B_values.forEach((val, i) => { const cell = document.createElement('div'); cell.className = 'cell'; cell.textContent = val; cell.onclick = () => onCellClick(type, 'B', i); document.getElementById(B).appendChild(cell); });
+            const resultSize = config.R_rows * config.R_cols;
+            for (let i = 0; i < resultSize; i++) { 
+                const cell = document.createElement('div'); 
+                cell.className = 'cell result-cell disabled'; 
+                cell.textContent = '?';
+                document.getElementById(R).appendChild(cell); 
+            }
+        }
+        updateDisplay(type);
+    }
+
+    function onCellClick(type, gridName, index) {
+        if (state[type].finalResult) return;
+        const { steps, type: exType } = configs[type];
+        if (state[type].currentStep >= steps.length) return; 
+        const step = steps[state[type].currentStep];
+        
+        let targetGrid, targetIndex;
+        if (exType === 'det') {
+            targetGrid = 'grid';
+            targetIndex = step.target;
+        } else {
+            targetGrid = step.target.grid;
+            targetIndex = step.target[gridName];
+        }
+
+        if (gridName === targetGrid && index === targetIndex) {
+            state[type].path.push({ grid: gridName, index: index });
+            state[type].currentStep++;
+            updateDisplay(type);
+        }
+    }
+    
+    function updateDisplay(type) {
+        const config = configs[type];
+        const ids = getGridIds(type);
+        const formulaEl = document.getElementById(config.type === 'mul' ? ids.F : ids.formula);
+        const current = state[type];
+        
+        if (config.type === 'mul' && current.currentStep > 0) {
+            const lastStep = config.steps[current.currentStep - 1];
+            if (lastStep.type === 'mul_B_click') {
+                 const nextStep = config.steps[current.currentStep];
+                 if (!nextStep || nextStep.result.index !== lastStep.result.index) {
+                     const R_grid = document.getElementById(ids.R).children;
+                     const resultIndex = lastStep.result.index;
+                     
+                     let finalVal = 0;
+                     const termsForThisResult = configs[type].steps.filter(s => s.result.index === resultIndex && s.type === 'mul_A_click');
+                     termsForThisResult.forEach(stepA => {
+                        finalVal += configs[type].A_values[stepA.target.A] * configs[type].B_values[stepA.target.B];
+                     });
+
+                     R_grid[resultIndex].textContent = finalVal;
+                     R_grid[resultIndex].classList.add('path');
+                     R_grid[resultIndex].classList.remove('disabled');
+                 }
+            }
+        }
+
+        let formulaText = "";
+        if (current.currentStep >= config.steps.length) {
+            current.finalResult = true;
+            if (config.type === 'det') {
+                if (config.showStructureOnly) {
+                    formulaText = `${generateDetFormula(type, current.currentStep, config.values)} <br><span class="final-result">結構學習完成！</span>`;
+                } else {
+                    const result = config.finalCalc(config.values);
+                    formulaText = `${generateDetFormula(type, current.currentStep, config.values)} = <span class="final-result">${result}</span><span class="correct-label">(正確)</span>`;
+                }
+            } else {
+                formulaText = `<span class="final-result">恭喜完成所有計算！</span>`;
+            }
+        } else {
+            if (config.type === 'det') {
+                formulaText = generateDetFormula(type, current.currentStep, config.values);
+            } else {
+                formulaText = generateMulFormula(type, current.currentStep);
+            }
+        }
+        
+        formulaEl.innerHTML = formulaText;
+        updateHighlight(type);
+    }
+
+    function updateHighlight(type) {
+        const ids = getGridIds(type);
+        const config = configs[type];
+        const { currentStep, finalResult } = state[type];
+        
+        Object.values(ids).forEach(id => {
+            const grid = document.getElementById(id);
+            if (grid) Array.from(grid.children).forEach(c => c.classList.remove('highlight', 'path', 'cofactor-sub', 'cofactor-mask'));
+        });
+
+        if (finalResult) {
+            if (config.showStructureOnly) {
+                const cells = document.getElementById(ids.grid).children;
+                Array.from(cells).forEach(cell => cell.classList.remove('cofactor-mask', 'cofactor-sub', 'highlight'));
+            }
+            if(config.type === 'mul') {
+                 const gridR = document.getElementById(ids.R).children;
+                 Array.from(gridR).forEach(cell => cell.classList.add('path'));
+            }
+            return;
+        }
+        
+        const { steps, type: exType, showStructureOnly } = config;
+        if (currentStep >= steps.length) return;
+        const step = steps[currentStep];
+
+        if (exType === 'det') {
+            const cells = document.getElementById(ids.grid).children;
+            if (showStructureOnly) {
+                const coefficientIndex = step.target;
+                const subMatrixIndices = new Set(step.sub_det);
+                Array.from(cells).forEach((cell, index) => {
+                    if (index === coefficientIndex) {
+                        cell.classList.add('highlight');
+                    } else if (subMatrixIndices.has(index)) {
+                        cell.classList.add('cofactor-sub');
+                    } else {
+                        cell.classList.add('cofactor-mask');
+                    }
+                });
+            } else {
+                cells[step.target].classList.add('highlight');
+                state[type].path.forEach(p => cells[p.index]?.classList.add('path'));
+            }
+        } else {
+            const { A, B, R } = ids;
+            const gridA = document.getElementById(A).children;
+            const gridB = document.getElementById(B).children;
+            const gridR = document.getElementById(R).children;
+
+            const targetGridName = step.target.grid;
+            const targetIndex = step.target[targetGridName];
+            (targetGridName === 'A' ? gridA : gridB)[targetIndex].classList.add('highlight');
+            
+            const currentResultIndex = step.result.index;
+            Array.from(gridR).forEach((cell, idx) => {
+                if (idx === currentResultIndex) {
+                    cell.classList.add('path');
+                }
+            });
+            
+            steps.forEach((s, i) => {
+                if (i < currentStep && s.result.index === currentResultIndex) {
+                    gridA[s.target.A].classList.add('path');
+                    gridB[s.target.B].classList.add('path');
+                }
+            });
+        }
+    }
+
+    window.onload = () => { Object.keys(configs).forEach(type => initExercise(type)); };
+    if (document.readyState === 'complete' || document.readyState === 'interactive') { window.onload(); }
+</script>
+</body>
+</html>
