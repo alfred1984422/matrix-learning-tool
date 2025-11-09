@@ -1,3 +1,8 @@
+import IPython
+from google.colab import output
+
+# 使用 display HTML 來渲染互動介面
+display(IPython.display.HTML('''
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -12,7 +17,7 @@
         flex-direction: column;
         align-items: center;
         padding: 20px;
-        box-sizing: border-box; /* 確保 padding 不會導致寬度溢出 */
+        box-sizing: border-box;
     }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; color: #333; }
     
@@ -51,16 +56,14 @@
     .correct-label { font-weight: bold; color: #2e7d32; margin-left: 8px; }
     .reset-btn { display: block; margin: 20px auto 0; padding: 10px 20px; font-size: 16px; font-weight: bold; color: #fff; background-color: #3f51b5; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
     .reset-btn:hover { background-color: #303f9f; transform: translateY(-2px); }
-    .latex-img { vertical-align: middle; margin-bottom: 4px; } /* 對齊 LaTex 圖片 */
+    .latex-img { vertical-align: middle; margin-bottom: 4px; }
     @keyframes pulse { 0% { box-shadow: 0 0 10px rgba(255, 235, 59, 0.6); } 50% { box-shadow: 0 0 20px rgba(255, 235, 59, 1); } 100% { box-shadow: 0 0 10px rgba(255, 235, 59, 0.6); } }
 </style>
 </head>
 <body>
 
-<!--  新的全域包裝容器 -->
 <div id="wrapper">
 
-    <!--  統一的學習手冊  -->
     <div class="manual-container">
         <h1>學習手冊：行列式與矩陣乘法</h1>
 
@@ -82,11 +85,11 @@
         <div class="manual-section">
             <h2>2. 矩陣乘法的基本規則</h2>
             <div class="manual-text" style="font-family: monospace, sans-serif;">
-                <p>假設有兩個二階矩陣 A 和 B：</p>
-                <!--  修正了 URL 編碼的 LaTeX 圖片  -->
-                <p>A = <img class="latex-img" src="https://latex.codecogs.com/svg.latex?%5Cdpi%7B120%7D%5Cbegin%7Bpmatrix%7D%20a%20%26%20b%20%5C%5C%20c%20%26%20d%20%5Cend%7Bpmatrix%7D" alt="Matrix A"/> , B = <img class="latex-img" src="https://latex.codecogs.com/svg.latex?%5Cdpi%7B120%7D%5Cbegin%7Bpmatrix%7D%20e%20%26%20f%20%5C%5C%20g%20%26%20h%20%5Cend%7Bpmatrix%7D" alt="Matrix B"/></p>
-                <p>它們的乘積 C = A × B 的結果如下：</p>
-                <p>C = <img class="latex-img" src="https://latex.codecogs.com/svg.latex?%5Cdpi%7B120%7D%5Cbegin%7Bpmatrix%7D%20ae+bg%20%26%20af+bh%20%5C%5C%20ce+dg%20%26%20cf+dh%20%5Cend%7Bpmatrix%7D" alt="Matrix C"/></p>
+                <p><b>規則：</b>一個 (m × <b>n</b>) 的矩陣 A，乘以一個 (<b>p</b> × q) 的矩陣 B，只有在 <b>n = p</b> (內側維度相同) 時才能相乘。</p>
+                <p><b>結果：</b>結果矩陣 C 的維度將是 (m × q) (由外側維度決定)。</p>
+                <p><b>範例 1：</b> (2 × <b>3</b>) × (<b>3</b> × 2)  ➡  結果是 (2 × 2) 矩陣。</p>
+                <p><b>範例 2：</b> (3 × <b>2</b>) × (<b>2</b> × 3)  ➡  結果是 (3 × 3) 矩陣。</p>
+                <p style="font-family: sans-serif; font-weight: normal;">這證明了矩陣乘法<b>不滿足交換律</b> (A × B ≠ B × A)。</p>
                 <p style="font-family: sans-serif; font-weight: normal;"><b>核心口訣：</b>結果矩陣 C 的第 <b>i</b> 行第 <b>j</b> 列的元素，等於 A 的第 <b>i</b> 行與 B 的第 <b>j</b> 列進行「內積」(對應元素相乘後再相加)。這就是練習中「<b>左邊的橫排點右邊的豎排</b>」的由來。</p>
             </div>
         </div>
@@ -99,14 +102,17 @@
     <div class="container"><h2>4. 3x3 按第一列展開 (學習結構)</h2><p class="instruction">點擊高亮係數，對應的子矩陣會自動標出，以學習展開結構。</p><div id="matrix-3x3-col1" class="matrix-grid grid-3x3"></div><div id="formula-3x3-col1" class="formula-display">det = ?</div><button class="reset-btn" onclick="initExercise('3x3-col1')">重新開始</button></div>
     <div class="container"><h2>5. 矩陣乘法 (2x2) x (2x2)</h2><p class="instruction">跟隨高亮提示，從左矩陣點到右矩陣，像跳舞一樣完成內積計算！</p><div class="matrix-container"><div id="matrix-mul-A-2x2" class="matrix-grid grid-2x2"></div><div class="matrix-op">×</div><div id="matrix-mul-B-2x2" class="matrix-grid grid-2x2"></div><div class="matrix-op">=</div><div id="matrix-mul-R-2x2" class="matrix-grid grid-2x2"></div></div><div id="formula-mul-2x2" class="formula-display">點擊左邊高亮的數字開始...</div><button class="reset-btn" onclick="initExercise('mul-2x2')">重新開始</button></div>
     <div class="container"><h2>6. 矩陣乘法 (3x3) x (3x3)</h2><p class="instruction">步驟變多了，但規則一樣：左邊的橫排點右邊的豎排。</p><div class="matrix-container"><div id="matrix-mul-A-3x3" class="matrix-grid grid-3x3"></div><div class="matrix-op">×</div><div id="matrix-mul-B-3x3" class="matrix-grid grid-3x3"></div><div class="matrix-op">=</div><div id="matrix-mul-R-3x3" class="matrix-grid grid-3x3"></div></div><div id="formula-mul-3x3" class="formula-display">點擊左邊高亮的數字開始...</div><button class="reset-btn" onclick="initExercise('mul-3x3')">重新開始</button></div>
-    <div class="container"><h2>7. 矩陣乘法 (2x3) x (3x2)</h2><p class="instruction">不同形狀的矩陣乘法，規則依然不變！</p><div class="matrix-container"><div id="matrix-mul-A-2x3" class="matrix-grid grid-2x3"></div><div class="matrix-op">×</div><div id="matrix-mul-B-3x2" class="matrix-grid grid-3x2"></div><div class="matrix-op">=</div><div id="matrix-mul-R-2x2-from-2x3" class="matrix-grid grid-2x2"></div></div><div id="formula-mul-2x3" class="formula-display">點擊左邊高亮的數字開始...</div><button class="reset-btn" onclick="initExercise('mul-2x3')">重新開始</button></div>
+    <div class="container"><h2>7. 矩陣乘法 (2x3) x (3x2) ➡ (2x2)</h2><p class="instruction">不同形狀的矩陣乘法，注意觀察結果的維度！</p><div class="matrix-container"><div id="matrix-mul-A-2x3" class="matrix-grid grid-2x3"></div><div class="matrix-op">×</div><div id="matrix-mul-B-3x2" class="matrix-grid grid-3x2"></div><div class="matrix-op">=</div><div id="matrix-mul-R-2x2-from-2x3" class="matrix-grid grid-2x2"></div></div><div id="formula-mul-2x3" class="formula-display">點擊左邊高亮的數字開始...</div><button class="reset-btn" onclick="initExercise('mul-2x3')">重新開始</button></div>
+    
+    <!-- ✨✨✨ 新增的第 8 個練習 ✨✨✨ -->
+    <div class="container"><h2>8. 矩陣乘法 (3x2) x (2x3) ➡ (3x3)</h2><p class="instruction">和上一個練習對比，看看順序顛倒後維度有何變化！</p><div class="matrix-container"><div id="matrix-mul-A-3x2" class="matrix-grid grid-3x2"></div><div class="matrix-op">×</div><div id="matrix-mul-B-2x3" class="matrix-grid grid-2x3"></div><div class="matrix-op">=</div><div id="matrix-mul-R-3x3-from-3x2" class="matrix-grid grid-3x3"></div></div><div id="formula-mul-3x2" class="formula-display">點擊左邊高亮的數字開始...</div><button class="reset-btn" onclick="initExercise('mul-3x2')">重新開始</button></div>
+
 </div>
 
 <script>
-    // JavaScript 邏輯部分確認無誤，保持不變
     const state = {};
 
-    function generateDetFormula(type, stepIndex, values) {
+    function generateDetFormula(type, stepIndex, values) { /* ... 保持不變 ... */ 
         const { steps, showStructureOnly } = configs[type];
         let formula = "det =";
         if (showStructureOnly) {
@@ -137,7 +143,7 @@
         return formula + " " + formulaParts.join('') + currentPart;
     }
     
-    function generateMulFormula(type, stepIndex) {
+    function generateMulFormula(type, stepIndex) { /* ... 保持不變 ... */ 
         const { steps, A_values, B_values, R_cols, A_cols } = configs[type];
         if (stepIndex >= steps.length) return `<span class="final-result">恭喜完成所有計算！</span>`;
         const currentStep = steps[stepIndex];
@@ -178,10 +184,12 @@
         '3x3-col1': { type: 'det', showStructureOnly: true, values: [1,2,3,4,5,6,7,8,9], steps: [ { target: 0, sign: '+', sub_det: [4,5,7,8] }, { target: 3, sign: '-', sub_det: [1,2,7,8] }, { target: 6, sign: '+', sub_det: [1,2,4,5] } ] },
         'mul-2x2': { type: 'mul', A_values: [1, 2, 4, 5], B_values: [7, 8, 9, 1], R_rows: 2, R_cols: 2, A_cols: 2 },
         'mul-3x3': { type: 'mul', A_values: [1,2,3,4,5,6,7,8,9], B_values: [9,8,7,6,5,4,3,2,1], R_rows: 3, R_cols: 3, A_cols: 3 },
-        'mul-2x3': { type: 'mul', A_values: [1, 2, 3, 4, 5, 6], B_values: [7, 8, 9, 1, 2, 3], R_rows: 2, R_cols: 2, A_cols: 3 }
+        'mul-2x3': { type: 'mul', A_values: [1, 2, 3, 4, 5, 6], B_values: [7, 8, 9, 1, 2, 3], R_rows: 2, R_cols: 2, A_cols: 3 },
+        // ✨✨✨ 新增的第 8 個練習的設定 ✨✨✨
+        'mul-3x2': { type: 'mul', A_values: [7, 8, 9, 1, 2, 3], B_values: [1, 2, 3, 4, 5, 6], R_rows: 3, R_cols: 3, A_cols: 2 },
     };
     
-    function generateMultiplySteps(type) {
+    function generateMultiplySteps(type) { /* ... 保持不變 ... */ 
         const { R_rows, R_cols, A_cols } = configs[type];
         const steps = [];
         for (let i = 0; i < R_rows; i++) {
@@ -203,10 +211,12 @@
         if (type === 'mul-2x2') return { A: 'matrix-mul-A-2x2', B: 'matrix-mul-B-2x2', R: 'matrix-mul-R-2x2', F: 'formula-mul-2x2' };
         if (type === 'mul-3x3') return { A: 'matrix-mul-A-3x3', B: 'matrix-mul-B-3x3', R: 'matrix-mul-R-3x3', F: 'formula-mul-3x3' };
         if (type === 'mul-2x3') return { A: 'matrix-mul-A-2x3', B: 'matrix-mul-B-3x2', R: 'matrix-mul-R-2x2-from-2x3', F: 'formula-mul-2x3'};
+        // ✨✨✨ 新增對 'mul-3x2' 的 ID 處理 ✨✨✨
+        if (type === 'mul-3x2') return { A: 'matrix-mul-A-3x2', B: 'matrix-mul-B-2x3', R: 'matrix-mul-R-3x3-from-3x2', F: 'formula-mul-3x2'};
         return { grid: `matrix-${type}`, formula: `formula-${type}` };
     }
 
-    function initExercise(type) {
+    function initExercise(type) { /* ... 保持不變 ... */ 
         const config = configs[type];
         const ids = getGridIds(type);
         state[type] = { currentStep: 0, path: [], finalResult: null };
@@ -236,7 +246,7 @@
         updateDisplay(type);
     }
 
-    function onCellClick(type, gridName, index) {
+    function onCellClick(type, gridName, index) { /* ... 保持不變 ... */ 
         if (state[type].finalResult) return;
         const { steps, type: exType } = configs[type];
         if (state[type].currentStep >= steps.length) return; 
@@ -258,7 +268,7 @@
         }
     }
     
-    function updateDisplay(type) {
+    function updateDisplay(type) { /* ... 保持不變 ... */ 
         const config = configs[type];
         const ids = getGridIds(type);
         const formulaEl = document.getElementById(config.type === 'mul' ? ids.F : ids.formula);
@@ -310,7 +320,7 @@
         updateHighlight(type);
     }
 
-    function updateHighlight(type) {
+    function updateHighlight(type) { /* ... 保持不變 ... */ 
         const ids = getGridIds(type);
         const config = configs[type];
         const { currentStep, finalResult } = state[type];
@@ -385,3 +395,4 @@
 </script>
 </body>
 </html>
+'''))
