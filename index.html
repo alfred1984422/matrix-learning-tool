@@ -64,6 +64,7 @@ display(IPython.display.HTML('''
 
 <div id="wrapper">
 
+    <!--  統一的學習手冊  -->
     <div class="manual-container">
         <h1>學習手冊：行列式與矩陣乘法</h1>
 
@@ -85,11 +86,11 @@ display(IPython.display.HTML('''
         <div class="manual-section">
             <h2>2. 矩陣乘法的基本規則</h2>
             <div class="manual-text" style="font-family: monospace, sans-serif;">
-                <p><b>規則：</b>一個 (m × <b>n</b>) 的矩陣 A，乘以一個 (<b>p</b> × q) 的矩陣 B，只有在 <b>n = p</b> (內側維度相同) 時才能相乘。</p>
-                <p><b>結果：</b>結果矩陣 C 的維度將是 (m × q) (由外側維度決定)。</p>
-                <p><b>範例 1：</b> (2 × <b>3</b>) × (<b>3</b> × 2)  ➡  結果是 (2 × 2) 矩陣。</p>
-                <p><b>範例 2：</b> (3 × <b>2</b>) × (<b>2</b> × 3)  ➡  結果是 (3 × 3) 矩陣。</p>
-                <p style="font-family: sans-serif; font-weight: normal;">這證明了矩陣乘法<b>不滿足交換律</b> (A × B ≠ B × A)。</p>
+                <p>假設有兩個二階矩陣 A 和 B：</p>
+                <!--  修正了 URL 編碼的 LaTeX 圖片  -->
+                <p>A = <img class="latex-img" src="https://latex.codecogs.com/svg.latex?%5Cdpi%7B120%7D%5Cbegin%7Bpmatrix%7D%20a%20%26%20b%20%5C%5C%20c%20%26%20d%20%5Cend%7Bpmatrix%7D" alt="Matrix A"/> , B = <img class="latex-img" src="https://latex.codecogs.com/svg.latex?%5Cdpi%7B120%7D%5Cbegin%7Bpmatrix%7D%20e%20%26%20f%20%5C%5C%20g%20%26%20h%20%5Cend%7Bpmatrix%7D" alt="Matrix B"/></p>
+                <p>它們的乘積 C = A × B 的結果如下：</p>
+                <p>C = <img class="latex-img" src="https://latex.codecogs.com/svg.latex?%5Cdpi%7B120%7D%5Cbegin%7Bpmatrix%7D%20ae+bg%20%26%20af+bh%20%5C%5C%20ce+dg%20%26%20cf+dh%20%5Cend%7Bpmatrix%7D" alt="Matrix C"/></p>
                 <p style="font-family: sans-serif; font-weight: normal;"><b>核心口訣：</b>結果矩陣 C 的第 <b>i</b> 行第 <b>j</b> 列的元素，等於 A 的第 <b>i</b> 行與 B 的第 <b>j</b> 列進行「內積」(對應元素相乘後再相加)。這就是練習中「<b>左邊的橫排點右邊的豎排</b>」的由來。</p>
             </div>
         </div>
@@ -396,3 +397,4 @@ display(IPython.display.HTML('''
 </body>
 </html>
 '''))
+
